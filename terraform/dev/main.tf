@@ -1,3 +1,5 @@
+#small change to trigger the workflow
+
 #  Define the provider
 provider "aws" {
   region = "us-east-1"
