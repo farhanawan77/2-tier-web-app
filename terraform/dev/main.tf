@@ -152,3 +152,5 @@ resource "aws_ecr_repository" "db" {
     scan_on_push = true
   }
 }
+  
+#******** reserved for alb **********  
