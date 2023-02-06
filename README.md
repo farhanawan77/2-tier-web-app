@@ -1,41 +1,51 @@
-# Install the required MySQL package
+# Building docker images and deploying docker container on AWS
 
-sudo apt-get update -y
-sudo apt-get install mysql-client -y
-
-# Running application locally
-pip3 install -r requirements.txt
-sudo python3 app.py
-# Building and running 2 tier web application locally
-### Building mysql docker image 
-```docker build -t my_db -f Dockerfile_mysql . ```
-
-### Building application docker image 
-```docker build -t my_app -f Dockerfile . ```
-
-### Running mysql
-```docker run -d -e MYSQL_ROOT_PASSWORD=pw  my_db```
+![dockerc](https://user-images.githubusercontent.com/44845754/216853565-a6d85afb-7389-4d4c-9e8a-5fc2d987aa18.png)
 
 
-### Get the IP of the database and export it as DBHOST variable
-```docker inspect <container_id>```
+
+This projects consists in:
+- A Flask web application that connects to a MySQL database and performs various operations such as adding and retrieving employees information from the database. 
+- A Terraform code that provisions an EC2 instance with the latest Amazon Linux AMI, adds an SSH key to the EC2 instance, creates a security group that allows SSH and certain inbound traffic, creates an elastic IP, and creates ECR repositories.
+- A GitHub Actions that build, test, tag, and push images to Amazon ECR. This workflow is triggered by any push to the main branch. 
 
 
-### Example when running DB runs as a docker container and app is running locally
-```
-export DBHOST=127.0.0.1
-export DBPORT=3307
-```
-### Example when running DB runs as a docker container and app is running locally
-```
-export DBHOST=172.17.0.2
-export DBPORT=3306
-```
-```
-export DBUSER=root
-export DATABASE=employees
-export DBPWD=pw
-export APP_COLOR=blue
-```
-### Run the application, make sure it is visible in the browser
-```docker run -p 8080:8080  -e DBHOST=$DBHOST -e DBPORT=$DBPORT -e  DBUSER=$DBUSER -e DBPWD=$DBPWD  my_app```
+## Running the application 
+
+1. Terraform
+- Clone this repo
+- Create a SSH key named A1-dev
+- Run Terraform (plan, apply)
+
+2. GitHub Actions
+- The Terraform code will create the ERC webapp and db. Make a pull request to the main branch and trigger the GitHub Actions. This will push the images to the ECR.
+
+3. EC2
+- Connect to the EC2 instance
+- Update yum and install docker
+- Insert your AWS credentials, if needed.
+- Login to ECR
+- Pull both images (db and webapp) to your local environment. 
+
+4. Running the Containers
+- Create a custom bridge network and use any name you want.
+- Run bd (MySql) container.
+- Use the following variables:
+  ```
+  export DBHOST=(your container IP)
+  export DBPORT=3306
+  export DBUSER=root
+  export DATABASE=employees
+  export DBPWD=your password)
+  ```
+  Example:
+  ```
+  docker run -d -e MYSQL_ROOT_PASSWORD=123 --network A1-network 123456789.dkr.ecr.us-east-1.amazonaws.com/db:latest         
+  ```
+- Run the webapp containers and change the variable APP_COLOR to see a different background
+  Exemple:
+  ```
+  docker run --name blue -p 8081:8080 -e DBHOST=$DBHOST -e DBPORT=$DBPORT -e  DBUSER=$DBUSER -e DBPWD=$DBPWD -e APP_COLOR=blue --network A1-network 12345678.dkr.ecr.us-east-1.amazonaws.com/webapp:latest
+  ```
+  
+  Ran as many webapps containers you want, just remember to change the ports (the Terraform code already opens the connection to 8081, 8082 and 8083).
