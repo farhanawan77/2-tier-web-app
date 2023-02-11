@@ -1,7 +1,6 @@
 # Building docker images and deploying docker container on AWS
 
-![dockerc](https://user-images.githubusercontent.com/44845754/216853565-a6d85afb-7389-4d4c-9e8a-5fc2d987aa18.png)
-
+![architecture](https://user-images.githubusercontent.com/44845754/218274105-fb48c2d9-f04d-4258-87e2-c3db0eafa0ac.png)
 
 
 This projects consists in:
