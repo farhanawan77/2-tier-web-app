@@ -24,8 +24,8 @@ jobs:
 
       - name: SSH into EC2 and deploy
         run: |
-          ssh -o StrictHostKeyChecking=no 54.242.150.154 << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@54.242.150.154 << 'EOF'
             cd /home/ubuntu/app
-            docker-compose down
+            docker-compose down || true
             docker-compose up -d --build
           EOF
