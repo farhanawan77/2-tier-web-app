@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v2
 
       - name: Set up SSH
@@ -18,13 +18,21 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
+      - name: Archive project (excluding .git)
+        run: |
+          tar --exclude='.git' -czf app.tar.gz .
+
       - name: Copy files to EC2
         run: |
-          scp -o StrictHostKeyChecking=no -r . ubuntu@54.242.150.154:/home/ubuntu/app
+          scp -o StrictHostKeyChecking=no app.tar.gz ubuntu@54.242.150.154:/home/ubuntu/
 
-      - name: SSH into EC2 and deploy
+      - name: SSH and Deploy on EC2
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@54.242.150.154 << 'EOF'
+            set -e
+            mkdir -p /home/ubuntu/app
+            tar -xzf /home/ubuntu/app.tar.gz -C /home/ubuntu/app
+            rm /home/ubuntu/app.tar.gz
             cd /home/ubuntu/app
             docker-compose down || true
             docker-compose up -d --build
