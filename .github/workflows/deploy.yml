@@ -10,30 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
-
-      - name: Archive project (excluding .git)
-        run: |
-          tar --exclude='.git' -czf app.tar.gz .
-
-      - name: Copy files to EC2
-        run: |
-          scp -o StrictHostKeyChecking=no app.tar.gz ubuntu@54.242.150.154:/home/ubuntu/
-
-      - name: SSH and Deploy on EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@54.242.150.154 << 'EOF'
-            set -e
-            mkdir -p /home/ubuntu/app
-            tar -xzf /home/ubuntu/app.tar.gz -C /home/ubuntu/app
-            rm /home/ubuntu/app.tar.gz
-            cd /home/ubuntu/app
-            docker-compose down || true
-            docker-compose up -d --build
-          EOF
+    - name: SSH & Deploy on EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: 54.227.152.36                
+        username: ubuntu                   
+        key: ${{ secrets.EC2_SSH_KEY }}    
+        script: |
+          cd /home/ubuntu/2-tier-web-app
+          git pull origin main
+          docker-compose down
+          docker-compose up -d --build
