@@ -16,11 +16,11 @@ jobs:
     - name: SSH & Deploy on EC2
       uses: appleboy/ssh-action@master
       with:
-        host: 54.89.166.57              
-        username: ubuntu                   
-        key: ${{ secrets.EC2_SSH_KEY }}    
+        host: 54.227.152.36               # Your EC2 public IP
+        username: ubuntu                  # Your EC2 username (Ubuntu default)
+        key: ${{ secrets.EC2_SSH_KEY }}   # Your EC2 private key as a GitHub secret
         script: |
-          cd /home/ubuntu/2-tier-web-app
+          cd /home/ubuntu/2-tier-web-app/app
           git pull origin main
           docker-compose down
           docker-compose up -d --build
